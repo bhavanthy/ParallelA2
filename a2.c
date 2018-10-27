@@ -52,11 +52,11 @@ void runMpi(int cm_size, int size){
     
     for(int i = 0; i < size; i++){
       for(int j = 0; j < size; j++){
-        matrixB[i][j]=(random()%10)+1;
+        matrixB[i][j]=random()%10;
       }
-      vectorA[i]=(random()%10)+1;
+      vectorA[i]=random()%10;
     }
-
+    clock_t begin = clock();
     // printf("Vector A: ");
     // printVector(vectorA, size);
     // printf("Matrix B: \n");
@@ -81,7 +81,9 @@ void runMpi(int cm_size, int size){
       }
       
     }
-
+    clock_t end = clock();
+    double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+    printf("process:%d, size:%d, time: %lf\n",cm_size, size, time_spent);
     // printf("Result: ");
     // printVector(result,size);
 
@@ -96,7 +98,6 @@ void runMpi(int cm_size, int size){
     
   }
   else {
-    printf("rank %d\n", rank);
     vectorA = malloc(sizeof(int)*size);
     matrixB = malloc(sizeof(int*)*amount);
     vectorC = malloc(sizeof(int)*amount);
@@ -129,8 +130,9 @@ int main (int argc, char* argv[]){
   if(argc == 2 && strcmp("-g",argv[1])==0){
     for(int i = 0; i < 4; i++){
       for(int j = 0; j < 4; j++){
-        runMpi(2,2);
-        printf("%d,%d\n",cm_sizes[i],sizes[j]);
+        char cmd[128];
+        sprintf(cmd, "%s %d %s %d %d", "mpiexec -n",cm_sizes[i],"./a2",cm_sizes[i], sizes[j]);
+        system(cmd);
       }
     }
   } else if (argc == 3){
