@@ -2,6 +2,8 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
  
 void printVector(int * vector, int size){
   printf("[ ");
@@ -27,16 +29,13 @@ int mutiMatrix(int * vector1, int * vector2, int size){
   return sum;
 }
 
-int main (int argc, char* argv[]){
+void runMpi(int cm_size, int size){
   int * vectorA, * vectorC, * result;
   int ** matrixB;
-  int rank, size, cm_size, amount, pNum, resNum = 0;
+  int rank, amount, pNum, resNum = 0;
 
-  cm_size = (int) strtol(argv[1], NULL, 10);
-  size = (int) strtol(argv[2],NULL, 10);
   amount = size/cm_size;
 
-  MPI_Init(NULL,NULL);      /* starts MPI */
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);        /* get current process id */
   MPI_Comm_size(MPI_COMM_WORLD, &cm_size);        /* get number of processes */
 
@@ -57,10 +56,11 @@ int main (int argc, char* argv[]){
       }
       vectorA[i]=(random()%10)+1;
     }
-    printf("Vector A: ");
-    printVector(vectorA, size);
-    printf("Matrix B: \n");
-    printMarix(matrixB, size);
+
+    // printf("Vector A: ");
+    // printVector(vectorA, size);
+    // printf("Matrix B: \n");
+    // printMarix(matrixB, size);
   
     for(pNum = 1; pNum < cm_size; pNum++){
       MPI_Send(vectorA, size, MPI_INT,pNum,0,MPI_COMM_WORLD);
@@ -82,8 +82,9 @@ int main (int argc, char* argv[]){
       
     }
 
-    printf("Result: ");
-    printVector(result,size);
+    // printf("Result: ");
+    // printVector(result,size);
+
     free(vectorA);
     for(int i = 0; i < amount; i++){
         free(matrixB[i]);
@@ -95,6 +96,7 @@ int main (int argc, char* argv[]){
     
   }
   else {
+    printf("rank %d\n", rank);
     vectorA = malloc(sizeof(int)*size);
     matrixB = malloc(sizeof(int*)*amount);
     vectorC = malloc(sizeof(int)*amount);
@@ -117,6 +119,25 @@ int main (int argc, char* argv[]){
   }
   
 
+}
+
+int main (int argc, char* argv[]){
+  int cm_size, size;
+  int cm_sizes[4] = {1,2,3,4};
+  int sizes[4] = {100,1000,10000,20000};
+  MPI_Init(NULL,NULL);      /* starts MPI */
+  if(argc == 2 && strcmp("-g",argv[1])==0){
+    for(int i = 0; i < 4; i++){
+      for(int j = 0; j < 4; j++){
+        runMpi(2,2);
+        printf("%d,%d\n",cm_sizes[i],sizes[j]);
+      }
+    }
+  } else if (argc == 3){
+    cm_size = (int) strtol(argv[1], NULL, 10);
+  size = (int) strtol(argv[2],NULL, 10);
+  runMpi(cm_size, size);
+  }
   MPI_Finalize();
   return 0;
 }
