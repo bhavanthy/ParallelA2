@@ -64,7 +64,7 @@ void runMpi(int cm_size, int size){
   
     for(pNum = 1; pNum < cm_size; pNum++){
       MPI_Send(vectorA, size, MPI_INT,pNum,0,MPI_COMM_WORLD);
-      MPI_Send(matrixB[(pNum-1)*amount], size*(amount+1), MPI_INT,pNum,0,MPI_COMM_WORLD);
+      MPI_Send(matrixB[(pNum-1)*amount], size*amount, MPI_INT,pNum,0,MPI_COMM_WORLD);
     }
 
     for(int i =(cm_size-1)* amount; i < size; i++){
@@ -105,7 +105,7 @@ void runMpi(int cm_size, int size){
         matrixB[i]=malloc(sizeof(int)*size);
     }
     MPI_Recv(vectorA, size, MPI_INT, 0,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Recv(matrixB[0], size*(amount+1), MPI_INT, 0,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(matrixB[0], size*amount, MPI_INT, 0,0,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     
     for(int i = 0; i < amount; i++){
       vectorC[i]=mutiMatrix(matrixB[i],vectorA,size);
